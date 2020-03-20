@@ -7,5 +7,15 @@ def index(request):
 
 def search(request, company, model, modelDetail):
 
-    result = searchFromEncar(company, model, modelDetail)
-    return JsonResponse(result, json_dumps_params = {'ensure_ascii': True})
+    result={
+        'status': '',
+        'result': ''
+    }
+    contentList = searchFromEncar(company, model, modelDetail)
+    if contentList is None:
+        result['status'] = 'error'
+    else:
+        result['status'] = 'success'
+        result['result'] = contentList
+
+    return JsonResponse(result, safe=False)

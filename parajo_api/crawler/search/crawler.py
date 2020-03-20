@@ -20,10 +20,10 @@ class Crawler:
         try:
             self.driver.get(url)
             element = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, 'sr_normal')))
+            return self.driver  
         except TimeoutException as e:
             print('timeoutException: '+e)
             return None
-        return self.driver  
          
     def getPageWithBs4(self, url):
         session = requests.Session()
