@@ -14,6 +14,8 @@ def search(request, company, model, modelDetail):
     contentList = searchFromEncar(company, model, modelDetail)
     if contentList is None:
         result['status'] = 'error'
+    elif len(contentList) == 0:
+        result['status'] = 'empty'
     else:
         result['status'] = 'success'
         result['result'] = contentList

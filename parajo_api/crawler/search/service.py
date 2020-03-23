@@ -33,6 +33,7 @@ def searchFromEncar(company, model, modelDetail):
     return contentList
   return None
 
+# 차량 사고이력을 가져오는 함수
 def getCarAccident(carId, crawler):
     car_detail_url = 'http://www.encar.com/md/sl/mdsl_regcar.do?method=inspectionViewNew&carid='+str(carId)
     #차량 상세정보 url
@@ -49,5 +50,6 @@ def getCarAccident(carId, crawler):
     except AttributeError as e:
       return None
 
+# 딕셔너리를 json 객체로 변환시켜주는 함수
 def obj_dict(obj):
     return obj.__dict__
