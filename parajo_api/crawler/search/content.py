@@ -4,6 +4,5 @@ class Content:
         self.carId = carId
         self.site = site
         self.info = info
-        self.info = info
         self.price = price
         self.accident = accident
