@@ -1,8 +1,8 @@
 from django.http import HttpResponse, JsonResponse
-from .search.service import searchFromEncar
-
+from .search.schedule import scaperWorker
 
 def index(request):
+    scaperWorker()
     return HttpResponse("Hello, world. You're at the polls index.")
 
 def search(request, company, model, modelDetail):

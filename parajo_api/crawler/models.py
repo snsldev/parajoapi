@@ -1,26 +1,53 @@
 from django.db import models
 
-# Create your models here.
-class Furits(models.Model):
+# 브랜드
+class CarBrand(models.Model):
+    seq = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=50, default=None)
+
+    class Meta:
+        db_table = "car_category_brand" # 실제 테이블명을 직접 입력할 경우 
+    
+    def __str__(self):
+        return  self.name
+# 모델그룹
+class CarModel(models.Model):
+    seq = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
-    descript = models.TextField()
-    price = models.FloatField()
-    quantity = models.IntegerField()
-    cdate = models.DateTimeField(auto_now_add=True)
+    # brand = models.IntegerField(default=None)
+    brand = models.ForeignKey(CarBrand, on_delete=models.PROTECT, db_column='brand')
+
+    class Meta:
+        db_table = "car_category_model" # 실제 테이블명을 직접 입력할 경우 
+    
+    def __str__(self):
+        return  self.name
+# 상세모델
+class CarModelDetail(models.Model):
+    seq = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=50, default=None)
+    # model = models.IntegerField(default=None)
+    model = models.ForeignKey(CarModel, on_delete=models.PROTECT, db_column='model')
+
+    class Meta:
+        db_table = "car_category_model_detail" # 실제 테이블명을 직접 입력할 경우 
     
     def __str__(self):
         return  self.name
 
+# 자동차 정보
 class CarInfo(models.Model):
     seq = models.AutoField(primary_key=True)
-    carid = models.CharField(max_length=50)
-    info = models.CharField(max_length=50)
-    price = models.IntegerField()
-    accident = models.CharField(max_length=50)
-    site = models.CharField(max_length=20)
+    catg_modeldetail_id = models.IntegerField(default=None)
+    carId = models.CharField(max_length=50, default=None)
+    info = models.CharField(max_length=255, default=None)
+    price = models.CharField(max_length=50, default=None)
+    accident = models.CharField(max_length=50, default=None)
+    site = models.CharField(max_length=20, default=None)
 
     class Meta:
-        db_table = "web_scraped_car_info" # table 실제이름 직접입력할경우 
+        db_table = "web_scraped_car_info" # 실제 테이블명을 직접 입력할 경우 
+    
     def __str__(self):
         return  self.info
 
