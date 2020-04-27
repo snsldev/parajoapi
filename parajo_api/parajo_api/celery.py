@@ -22,12 +22,3 @@ app.autodiscover_tasks()
 @app.task(bind=True)
 def debug_task(self):
     print('Request: {0!r}'.format(self.request))
-
-app.conf.beat_schedule = {
-    'run-every-seconds': {
-        'task': 'crawler.tasks.sayHello',
-        'schedule': timedelta(seconds=1),
-        #'schedule': crontab(minute=0, hour=0, day_of_month='2-30/2'), #짝수일 
-        'args': ()
-    },
-}

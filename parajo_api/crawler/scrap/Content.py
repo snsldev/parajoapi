@@ -6,3 +6,8 @@ class Content:
         self.info = info
         self.price = price
         self.accident = accident
+
+class CarGrade:
+
+    def __init__(self, name):
+        self.name = name

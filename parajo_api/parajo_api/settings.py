@@ -11,24 +11,27 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
-
-
-
+from datetime import timedelta
 
 # Celery settings
 
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
-
 #: Only add pickle to this list if your broker is secured
 #: from unwanted access (see userguide/security.html)
-# CELERY_ACCEPT_CONTENT = ['json']
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 CELERY_TIMEZONE = 'Asia/Seoul'
 CELERY_ENABLE_UTC=False
-# CELERY_TASK_SERIALIZER = 'json'
-
-
-
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_BEAT_SCHEDULE = {
+    'run-every-seconds': {
+        'task': 'crawler.tasks.sayHello',
+        'schedule': timedelta(seconds=1),
+        #'schedule': crontab(minute=0, hour=0, day_of_month='2-30/2'), #짝수일 
+        'args': ()
+    },
+}
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -43,7 +46,7 @@ SECRET_KEY = '@ql1yp=8#f##i(omvx$!_#d(06td+8()pk0i07yyx8!t9@+koh'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -98,20 +101,34 @@ WSGI_APPLICATION = 'parajo_api.wsgi.application'
 #         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
 #     }
 # }
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'parajo',
-        'USER': 'parajodev', # 데이터베이스 계정
-        'PASSWORD': 'parajodev', # 계정 비밀번호
-        'HOST': 'localhost', # 데이테베이스 주소(IP)
-        'PORT': '3306', # 데이터베이스 포트(보통은 3306)
-        'OPTIONS': {
-            'init_command': 'SET sql_mode="STRICT_TRANS_TABLES"'
+if 'RDS_HOSTNAME' in os.environ:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'parajo',
+            'USER': 'parajodev', # 데이터베이스 계정
+            'PASSWORD': 'parajodev', # 계정 비밀번호
+            'HOST': 'parajocom.cnr07eramdtv.ap-northeast-2.rds.amazonaws.com', # 데이테베이스 주소(IP)
+            'PORT': '3306', # 데이터베이스 포트(보통은 3306)
+            'OPTIONS': {
+                'init_command': 'SET sql_mode="STRICT_TRANS_TABLES"'
+            }
         }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'parajo',
+            'USER': 'parajodev', # 데이터베이스 계정
+            'PASSWORD': 'parajodev', # 계정 비밀번호
+            'HOST': 'localhost', # 데이테베이스 주소(IP)
+            'PORT': '3306', # 데이터베이스 포트(보통은 3306)
+            'OPTIONS': {
+                'init_command': 'SET sql_mode="STRICT_TRANS_TABLES"'
+            }
+        }
+    }
 DATABASE_OPTIONS = {'charset': 'utf8'}
 
 

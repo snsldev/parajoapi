@@ -1,6 +1,6 @@
 from django.db import models
 
-# 브랜드
+# 차량 카테고리-브랜드
 class CarBrand(models.Model):
     seq = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50, default=None)
@@ -10,7 +10,7 @@ class CarBrand(models.Model):
     
     def __str__(self):
         return  self.name
-# 모델그룹
+# 차량 카테고리-모델
 class CarModel(models.Model):
     seq = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
@@ -22,7 +22,8 @@ class CarModel(models.Model):
     
     def __str__(self):
         return  self.name
-# 상세모델
+        
+# 차량 카테고리-상세모델
 class CarModelDetail(models.Model):
     seq = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50, default=None)
@@ -31,6 +32,18 @@ class CarModelDetail(models.Model):
 
     class Meta:
         db_table = "car_category_model_detail" # 실제 테이블명을 직접 입력할 경우 
+    
+    def __str__(self):
+        return  self.name
+
+# 차량 카테고리-등급
+class CarGrade(models.Model):
+    seq = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=50, default=None)
+    modelDetail = models.ForeignKey(CarModelDetail, on_delete=models.PROTECT, db_column='modelDetail')
+
+    class Meta:
+        db_table = "car_category_model_detail_grade" # 실제 테이블명을 직접 입력할 경우 
     
     def __str__(self):
         return  self.name

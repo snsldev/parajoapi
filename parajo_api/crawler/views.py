@@ -1,23 +1,32 @@
 from django.http import HttpResponse, JsonResponse
-from .search.schedule import scaperWorker
+from .scrap.ScrapService import ScrapService
 
 def index(request):
-    scaperWorker()
     return HttpResponse("Hello, world. You're at the polls index.")
 
-def search(request, company, model, modelDetail):
+def scrapCarInfo(request):
+    scrapService = ScrapService()
+    scrapService.scrapCarInfo()
+    return HttpResponse("crawling scrapCarInfo success!")
 
-    result={
-        'status': '',
-        'result': ''
-    }
-    contentList = searchFromEncar(company, model, modelDetail)
-    if contentList is None:
-        result['status'] = 'error'
-    elif len(contentList) == 0:
-        result['status'] = 'empty'
-    else:
-        result['status'] = 'success'
-        result['result'] = contentList
+def scrapCarGrade(request):
+    scrapService = ScrapService()
+    scrapService.scrapCarGrade()
+    return HttpResponse("crawling scrapCarGrade success!")
 
-    return JsonResponse(result, safe=False)
+# def search(request, company, model, modelDetail):
+
+#     result={
+#         'status': '',
+#         'result': ''
+#     }
+#     contentList = searchFromEncar(company, model, modelDetail)
+#     if contentList is None:
+#         result['status'] = 'error'
+#     elif len(contentList) == 0:
+#         result['status'] = 'empty'
+#     else:
+#         result['status'] = 'success'
+#         result['result'] = contentList
+
+#     return JsonResponse(result, safe=False)

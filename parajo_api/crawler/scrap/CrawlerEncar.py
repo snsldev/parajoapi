@@ -1,7 +1,7 @@
 import requests
 import time
 import re
-from .content import Content
+from .Content import Content, CarGrade
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -11,24 +11,43 @@ from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import UnexpectedAlertPresentException
 
-
 class CrawlerEncar:
 
     def __init__(self):
         chrome_options = Options()
-        chrome_options.add_argument("--headless")
+        # chrome_options.add_argument("--headless")
+        # UserAgent값을 바꿔줍시다!
+        chrome_options.add_argument("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36")
+
         self.driver = webdriver.Chrome(
             executable_path='C:\work\chromedriver\chromedriver',
             options=chrome_options)
+        # driver.implicitly_wait(3)
 
     def getPageWithSelenium(self, url):
-        driver = None
+        driver = self.driver
         try:
             self.driver.get(url)
             time.sleep(3)
             element = WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'tbody#sr_normal > tr')))
             # print(element.text)
-            driver = self.driver  
+            #driver = self.driver  
+        except UnexpectedAlertPresentException as e:
+            print('[!] Error: ' + str(e))
+        except TimeoutException as e:
+            print ("Timed out waiting for page to load")
+        except Exception as e:
+            print("알수업는 예외 발생"+e)
+        finally:
+            return driver
+
+    def getPageWithSeleniumForCarGrade(self, url):
+        driver = self.driver
+        try:
+            self.driver.get(url)
+            time.sleep(2)
+            element = WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'div#stepGardeSet')))
+            #print('element확인: '+element.text)
         except UnexpectedAlertPresentException as e:
             print('[!] Error: ' + str(e))
         except TimeoutException as e:
@@ -50,8 +69,43 @@ class CrawlerEncar:
 
     def getDriver(self):
         return self.driver
+    
+    # 자동차 등급 긁어오기
+    def crawlCarGrade(self, company, model, modelDetail):
+        # 국내차/수입차에따라 URL 구분
+        url = ''
+        if self.isDomestic(company) is True:
+            url = f'http://www.encar.com/dc/dc_carsearchlist.do?carType=kor#!%7B%22action%22%3A%22(And.Hidden.N._.(C.CarType.Y._.(C.Manufacturer.{company}._.(C.ModelGroup.{model}._.Model.{modelDetail}.))))%22%7D'
+        else:
+            url = f'http://www.encar.com/fc/fc_carsearchlist.do?carType=for#!%7B%22action%22%3A%22(And.Hidden.N._.(C.CarType.N._.(C.Manufacturer.{company}._.(C.ModelGroup.{model}._.Model.{modelDetail}.))))%22%7D'
+        
+        print(url)
+        # 셀레니움에 url 요청
+       
+        driver = self.getPageWithSeleniumForCarGrade(url)
+        
+        # 컨텐츠 파싱 
+        if driver is not None:
+            contentList = list() #컨텐트 반환리스트
+            selector = '//div[@id="stepGardeSet"]/dl/dd'
+            selectedElems = driver.find_elements_by_xpath(selector)
+            print('찾은 리스트 개수: '+str(len(selectedElems)))
+            if(len(selectedElems) >0):
+                for elem in selectedElems:
+                    # 등급 이름 
+                    name_text = elem.find_element_by_css_selector('label').text
+                    print('등급명: '+name_text)
+                    # 리스트에 삽입
+                    content = CarGrade(name_text)
+                    contentList.append(content)
+                # pp(contentList)
+                return contentList # 컨텐츠 리스트 반환
+            
+        #url 요청후 컨텐츠가없으면 none
+        return None 
 
-    def search(self, company, model, modelDetail):
+    # 자동차 가격정보 긁어오기
+    def crawlCarPrice(self, company, model, modelDetail):
         # 국내차/수입차에따라 URL 구분
         url = ''
         if self.isDomestic(company) is True:
