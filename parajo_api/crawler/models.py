@@ -52,6 +52,9 @@ class CarGrade(models.Model):
 class CarInfo(models.Model):
     seq = models.AutoField(primary_key=True)
     catg_modeldetail_id = models.IntegerField(default=None)
+    catg_grade_id = models.IntegerField(default=None)
+    catg_modeldetail_name = models.CharField(max_length=50, default=None)
+    catg_grade_name = models.CharField(max_length=50, default=None)
     carId = models.CharField(max_length=50, default=None)
     info = models.CharField(max_length=255, default=None)
     price = models.CharField(max_length=50, default=None)

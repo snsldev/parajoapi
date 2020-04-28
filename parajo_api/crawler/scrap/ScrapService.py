@@ -9,12 +9,14 @@ class ScrapService:
             cls.instance = super(ScrapService, cls).__new__(cls)
         return cls.instance
   
-  def scrapCarInfo(self):
+  # 차량 가격정보 수집하기
+  def scrapCarPriceService(self):
     crawler = CrawlerEncar()
     scraper = Scrapper(crawler)
-    scraper.scrapCarPriceInfo()
+    scraper.scrapCarPrice()
 
-  def scrapCarGrade(self):
+  # 차량 카테고리-등급 수집하기
+  def scrapCarGradeService(self):
     crawler = CrawlerEncar()
     scraper = Scrapper(crawler)
-    scraper.scrapCarGradeInfo()
+    scraper.scrapCarGrade()

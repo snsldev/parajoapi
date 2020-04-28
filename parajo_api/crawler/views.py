@@ -4,14 +4,14 @@ from .scrap.ScrapService import ScrapService
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
 
-def scrapCarInfo(request):
+def scrapCarPrice(request):
     scrapService = ScrapService()
-    scrapService.scrapCarInfo()
+    scrapService.scrapCarPriceService()
     return HttpResponse("crawling scrapCarInfo success!")
 
 def scrapCarGrade(request):
     scrapService = ScrapService()
-    scrapService.scrapCarGrade()
+    scrapService.scrapCarGradeService()
     return HttpResponse("crawling scrapCarGrade success!")
 
 # def search(request, company, model, modelDetail):
