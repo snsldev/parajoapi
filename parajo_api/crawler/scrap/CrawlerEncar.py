@@ -10,9 +10,9 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import UnexpectedAlertPresentException
-
+from urllib.parse import quote, urlencode
 class CrawlerEncar:
-
+ 
     # 셀레니움 초기화 
     def __init__(self):
         chrome_options = Options()
@@ -126,9 +126,9 @@ class CrawlerEncar:
                     detail_text = elem.find_element_by_css_selector('td.inf .detail').text
                     info = model_text+detail_text
                     price = elem.find_element_by_css_selector('td.prc_hs').text
-                    accident = self.getCarAccident(carId) #사고이력 조회(새창)
+                    # accident = self.getCarAccident(carId) #사고이력 조회(새창)
                     # 리스트에 삽입
-                    content = Content(carId, '엔카', info, price, accident) 
+                    content = Content(carId, '엔카', info, price, accident=None) 
                     contentList.append(content)
                 # pp(contentList)
                 return contentList # 컨텐츠 리스트 반환
@@ -186,15 +186,19 @@ class CrawlerEncar:
         else:
             pre = 'fc/fc_carsearchlist.do?carType=for'
         
+        modelDetail = self.adjustParam(modelDetail)
+        modelDetail = quote((modelDetail))
+
+        model = self.adjustParam(model)
+        model = quote(model)
+
         if grade is not None:
-            tail = f"_.(C.Model.{modelDetail}._.BadgeGroup.{grade}.)))))%22{limit}%7D"
+            tail = f"_.(C.Model.{modelDetail}._.BadgeGroup.{quote(grade)}.)))))%22{limit}%7D"
             cartype='CarType.Y'
         else:
             tail = f"_.Model.{modelDetail}.))))%22{limit}%7D"
             cartype='CarType.N'
     
-        model = self.adjustParam(model)
-        modelDetail = self.adjustParam(modelDetail)
         url = f"http://www.encar.com/{pre}#!%7B%22action%22%3A%22(And.Hidden.N._.(C.{cartype}._.(C.Manufacturer.{company}._.(C.ModelGroup.{model}."+tail
-        
+        # print(url)
         return url
