@@ -14,6 +14,11 @@ def scrapCarGrade(request):
     scrapService.scrapCarGradeService()
     return HttpResponse("crawling scrapCarGrade success!")
 
+def scrapCarGradeSubGroup(request):
+    scrapService = ScrapService()
+    scrapService.scrapCarGradeSubGroupService()
+    return HttpResponse("crawling scrapCarGradeSubGroup success!")
+
 # def search(request, company, model, modelDetail):
 
 #     result={

@@ -11,3 +11,8 @@ class CarGrade:
 
     def __init__(self, name):
         self.name = name
+
+class CarGradeSubGroup:
+
+    def __init__(self, name):
+        self.name = name

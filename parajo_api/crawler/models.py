@@ -48,6 +48,18 @@ class CarGrade(models.Model):
     def __str__(self):
         return  self.name
 
+# 차량 카테고리-등급-세부등급1
+class CarGradeSubGroup(models.Model):
+    seq = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=50, default=None)
+    grade = models.ForeignKey(CarGrade, on_delete=models.PROTECT, db_column='grade')
+
+    class Meta:
+        db_table = "car_category_model_detail_grade_subgroup" # 실제 테이블명을 직접 입력할 경우 
+    
+    def __str__(self):
+        return  self.name
+
 # 자동차 정보
 class CarInfo(models.Model):
     seq = models.AutoField(primary_key=True)

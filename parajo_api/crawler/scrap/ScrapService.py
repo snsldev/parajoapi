@@ -20,3 +20,11 @@ class ScrapService:
     crawler = CrawlerEncar()
     scraper = Scrapper(crawler)
     scraper.scrapCarGrade()
+
+    
+  # 차량 카테고리-등급-세부등급1 수집하기
+  def scrapCarGradeSubGroupService(self):
+    crawler = CrawlerEncar()
+    scraper = Scrapper(crawler)
+    scraper.scrapCarGradeSubGroup()
+
