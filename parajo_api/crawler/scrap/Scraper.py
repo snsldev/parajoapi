@@ -1,4 +1,4 @@
-from ..models import CarModelDetail, CarInfo, CarGrade, CarGradeSubGroup
+from ..models import CarModelDetail, CarInfo, CarGrade, CarGradeSubGroup, CarGradeSub
 from .CrawlerEncar import CrawlerEncar
 import re
 
@@ -10,10 +10,39 @@ class Scrapper:
   def __init__(self, crawler: CrawlerEncar):
     self.crawler = crawler
 
-  # 카테고리- 등급 세부1 스크랩핑
+  # 카테고리 - 세부등급2 스크랩
+  def scrapCarGradeSub(self):
+
+    #파라조 차량 카테고리(브랜드-모델-세부모델-등급-세부등급1) 리스트를 불러옴
+    print('START-SCRAPING-CAR-GRADE-SUB-PROCESS =================')
+    carDBList = CarGradeSubGroup.objects.all().select_related().select_related().select_related().select_related()
+    # print(results)
+    crawler = self.crawler
+
+    for gradeSubGroup in carDBList:
+     
+      grade = gradeSubGroup.grade # 등급
+      grade_name = grade.name 
+      modelDetail = grade.modelDetail # 세부모델
+      modelDetail_name = re.sub('\(([^\)])*~(.)*\)', '', modelDetail.name).strip() # (~년식정보) 제거후 앞뒤 공백 제거
+      model = modelDetail.model
+      brand = model.brand
+      grade_subgroup_name = gradeSubGroup.name
+     
+      print(f"brand: {brand.name}, model: {model.name},  model-detail:{modelDetail_name}, grade_name:{grade_name}, grade_subgroup_name:{grade_subgroup_name}")
+     
+      # 스크랩 하기
+      scrapedResult = crawler.crawlCarGradeSub(brand.name, model.name, modelDetail_name, grade_name, grade_subgroup_name)
+      if scrapedResult is not None:
+        # db에 저장하기
+        self.storeCarCategoryGradeSub(gradeSubGroup, scrapedResult)
+    crawler.getDriver().quit() #끝났으면 셀레니움 브라우져 정상종료
+    print('END-SCRAPING-CAR-GRADE-SUB-PROCESS =================')
+
+  # 카테고리 - 세부등급1 스크랩
   def scrapCarGradeSubGroup(self):
-    #파라조 DB의 모든 차량 카테고리 리스트를 불러옴
-    print('START-SCRAPING-CAR-GRADE-PROCESS =================')
+    #파라조 DB의 차량 카테고리 리스트를 불러옴
+    print('START-SCRAPING-CAR-GRADE-SUBGROUP-PROCESS =================')
     carDBList = CarGrade.objects.all().select_related().select_related().select_related()
     # print(results)
     crawler = self.crawler
@@ -33,9 +62,10 @@ class Scrapper:
         # db에 저장하기
         self.storeCarCategoryGradeSubGroup(grade, scrapedResult)
     crawler.getDriver().quit() #끝났으면 셀레니움 브라우져 정상종료
-    print('END-SCRAPING-CAR-GRADE-PROCESS =================')
+    print('END-SCRAPING-CAR-GRADE-SUBGROUP-PROCESS =================')
     
     return None
+
   # 카테고리- 등급 스크랩핑
   '''
   차량 카테고리 db에서 모든 리스트를 가져와서 
@@ -65,6 +95,12 @@ class Scrapper:
     print('END-SCRAPING-CAR-GRADE-PROCESS =================')
     
     return None
+
+  # 차량 카테고리-등급-세부등급2 테이블에 저장
+  def storeCarCategoryGradeSub(self, gradeSubGroup, scrapedResult):
+    for item in scrapedResult:
+      carGradeSub = CarGradeSub(name=item.name, gradeSubGroup=gradeSubGroup)
+      carGradeSub.save()
 
   # 차량 카테고리-등급-세부등급1 테이블에 저장
   def storeCarCategoryGradeSubGroup(self, grade, scrapedResult):

@@ -1,7 +1,8 @@
 from .Scraper import Scrapper
 from .CrawlerEncar import CrawlerEncar
-from ..models import CarModelDetail
-
+'''
+스크랩 서비스 클래스
+'''
 class ScrapService:
 
   def __new__(cls):
@@ -20,11 +21,16 @@ class ScrapService:
     crawler = CrawlerEncar()
     scraper = Scrapper(crawler)
     scraper.scrapCarGrade()
-
     
   # 차량 카테고리-등급-세부등급1 수집하기
   def scrapCarGradeSubGroupService(self):
     crawler = CrawlerEncar()
     scraper = Scrapper(crawler)
     scraper.scrapCarGradeSubGroup()
+
+  # 차량 카테고리-등급-세부등급2 수집하기
+  def scrapCarGradeSubService(self):
+    crawler = CrawlerEncar()
+    scraper = Scrapper(crawler)
+    scraper.scrapCarGradeSub()
 

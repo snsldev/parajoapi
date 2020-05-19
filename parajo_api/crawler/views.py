@@ -14,9 +14,16 @@ def scrapCarGrade(request):
     scrapService.scrapCarGradeService()
     return HttpResponse("crawling scrapCarGrade success!")
 
+# 카테고리-세부등급1 스크랩
 def scrapCarGradeSubGroup(request):
     scrapService = ScrapService()
     scrapService.scrapCarGradeSubGroupService()
+    return HttpResponse("crawling scrapCarGradeSubGroup success!")
+
+# 카테고리-세부등급2 스크랩
+def scrapCarGradeSub(request):
+    scrapService = ScrapService()
+    scrapService.scrapCarGradeSubService()
     return HttpResponse("crawling scrapCarGradeSubGroup success!")
 
 # def search(request, company, model, modelDetail):

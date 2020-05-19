@@ -7,5 +7,6 @@ urlpatterns = [
     path('scrapCarPrice', views.scrapCarPrice, name='scrapCarPrice'),
     path('scrapCarGrade', views.scrapCarGrade, name='scrapCarGrade'),
     path('scrapCarGradeSubGroup', views.scrapCarGradeSubGroup, name='scrapCarGradeSubGroup'),
+    path('scrapCarGradeSub', views.scrapCarGradeSub, name='scrapCarGradeSub'),
     # path('car/search/<str:company>/<str:model>/<str:modelDetail>/', views.search, name='search'),
 ]

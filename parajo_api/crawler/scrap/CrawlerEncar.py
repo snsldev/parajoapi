@@ -1,7 +1,7 @@
 import requests
 import time
 import re
-from .Content import Content, CarGrade, CarGradeSubGroup
+from .Content import Content, CarGrade, CarGradeSubGroup, CarGradeSub
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -11,53 +11,37 @@ from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import UnexpectedAlertPresentException
 from urllib.parse import quote, urlencode
+
 class CrawlerEncar:
  
     # 셀레니움 초기화 
     def __init__(self):
         chrome_options = Options()
         chrome_options.add_argument("--headless")
-        # UserAgent값을 바꿔줍시다!
+        # UserAgent값 변경시
         # chrome_options.add_argument("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36")
         self.driver = webdriver.Chrome(
             executable_path='C:\work\chromedriver\chromedriver',
             options=chrome_options)
-    
-    # 가격정보 가져오기 전용 실레니움 url요청
-    # def getPageWithSeleniumForCarPrice(self, url):
-    #     driver = None
-    #     try:
-    #         self.driver.get(url)
-    #         time.sleep(2)
-    #         element = WebDriverWait(self.driver, 7).until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'tbody#sr_normal > tr')))
-    #         # print(element.text)
-    #         driver = self.driver  
-    #     except UnexpectedAlertPresentException as e:
-    #         print('[!] Error: ' + str(e))
-    #     except TimeoutException as e:
-    #         print ("Timed out waiting for page to load")
-    #     except Exception as e:
-    #         print("알수업는 예외 발생"+e)
-    #     finally:
-    #         return driver
 
-    # 범용 전용 실레니움 url요청
+    # 실레니움 url요청
     def getPageWithSelenium(self, url, mode):
         driver = None
         try:
             self.driver.get(url)
-            time.sleep(2)
             if mode == 'price':
+                time.sleep(2)
                 element = WebDriverWait(self.driver, 7).until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'tbody#sr_normal > tr')))
             elif mode == 'modeldetail':
+                time.sleep(2)
                 element = WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'div#stepGardeSet')))
             elif mode == 'grade':
+                time.sleep(2)
                 element = WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'dl#stepGared_0')))
-            # elif mode == 'gradeSubGroup':
-            #     element = WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'div#stepGardeSet')))
-            # elif mode == 'gradeSub':
-            #     element = WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'div#stepGardeSet')))
-
+            elif mode == 'gradeSubGroup':
+                print('==driver url mode is gradeSubGroup')
+                time.sleep(2)
+                element = WebDriverWait(self.driver, 3).until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'dl#stepDeGared'))) #수정됨
             driver = self.driver
         except UnexpectedAlertPresentException as e:
             print('[!] Error: ' + str(e))
@@ -82,7 +66,37 @@ class CrawlerEncar:
     def getDriver(self):
         return self.driver
     
-    # 자동차 등급 - 세부등급1 긁어오기
+    # 카테고리 세부등급2 크롤링
+    def crawlCarGradeSub(self, company, model, modelDetail, grade, gradeSubGroup):
+        print("===call crawlCarGradeSub")
+        # 셀레니움에 url 요청
+        url = self.makeUrlUnderGrade(company, model, modelDetail, grade, gradeSubGroup, None, None)
+        print(url)
+        
+        #세부등급1을 요청해야 세부등급2가 나옴    
+        driver = self.getPageWithSelenium(url, 'gradeSubGroup')
+
+        # URL 요청후 컨텐츠가 있으면 컨텐츠 파싱 
+        if driver is not None:
+            contentList = list() #컨텐트 반환리스트
+            selector = '//dl[@id="stepDeGared"]/dd/p' #수정됨
+            selectedElems = driver.find_elements_by_xpath(selector)
+            print('찾은 리스트 개수: '+str(len(selectedElems)))
+            if(len(selectedElems) > 0):
+                for elem in selectedElems:
+                    # 세부등급2 이름 
+                    name = elem.find_element_by_css_selector('label').get_attribute('title') #수정됨
+                    print('세부등급2 명: '+name)
+                    # 리스트에 삽입
+                    content = CarGradeSub(name)
+                    contentList.append(content)
+        
+                return contentList # 컨텐츠 리스트 반환
+            
+        # URL 요청후 컨텐츠가 없다면 None리턴
+        return None 
+
+    # 카테고리 세부등급1 크롤링
     def crawlCarGradeSubGroup(self, company, model, modelDetail, grade):
         # 셀레니움에 url 요청
         url = self.makeUrlUnderGrade(company, model, modelDetail, grade, None, None, None)
@@ -97,7 +111,7 @@ class CrawlerEncar:
             print('찾은 리스트 개수: '+str(len(selectedElems)))
             if(len(selectedElems) > 0):
                 for elem in selectedElems:
-                    # 등급 이름 
+                    # 세부등급1 이름 
                     name = elem.find_element_by_css_selector('label').get_attribute('title')
                     print('세부등급1 명: '+name)
                     # 리스트에 삽입
@@ -110,7 +124,7 @@ class CrawlerEncar:
         # URL 요청후 컨텐츠가 없다면 None리턴
         return None 
 
-    # 자동차 등급 긁어오기
+    # 카테고리-등급 크롤링
     def crawlCarGrade(self, company, model, modelDetail):
         # 셀레니움에 url 요청
         url = self.makeUrl(company, model, modelDetail)
@@ -137,7 +151,7 @@ class CrawlerEncar:
         # URL 요청후 컨텐츠가 없다면 None리턴
         return None 
 
-    # 자동차 가격정보 긁어오기
+    # 차량가격정보 크롤링
     def crawlCarPrice(self, company, model, modelDetail, grade):
         # 셀레니움에 url 요청
         url = self.makeUrl(company, model, modelDetail, grade, 100)
@@ -174,7 +188,7 @@ class CrawlerEncar:
         #url 요청후 컨텐츠가없으면 none
         return None 
 
-    # 차량 사고이력을 수집함
+    # 차량 사고이력 크롤링
     def getCarAccident(self, carId):
         print(str(carId)+' 사고이력 조회중..')
         car_detail_url = 'http://www.encar.com/md/sl/mdsl_regcar.do?method=inspectionViewNew&carid='+str(carId)
@@ -275,13 +289,14 @@ class CrawlerEncar:
             # gradeSubGroup url 코드작성
             gradeSubGroup = self.adjustParam(gradeSubGroup)
             gradeSubGroup = quote(gradeSubGroup)
-            tail = f"_.(C.Model.{modelDetail}._.BadgeGroup.{grade}.)))))%22{limit}%7D"
+            # tail = f"_.(C.Model.{modelDetail}._.BadgeGroup.{grade}.)))))%22{limit}%7D" 
+            tail = f"_.(C.Model.{modelDetail}._.(C.BadgeGroup.{grade}._.Badge.{gradeSubGroup}.))))))%22{limit}%7D" #수정요
             
             if gradeSub is not None:
                 # gradeSub url 코드작성
                 gradeSub = self.adjustParam(gradeSub)
                 gradeSub = quote(gradeSub)
-                tail = f"_.(C.Model.{modelDetail}._.BadgeGroup.{grade}.)))))%22{limit}%7D"
+                # tail = f"_.(C.Model.{modelDetail}._.BadgeGroup.{grade}.)))))%22{limit}%7D" #수정요
 
     
         url = f"http://www.encar.com/{pre}#!%7B%22action%22%3A%22(And.Hidden.N._.(C.{cartype}._.(C.Manufacturer.{company}._.(C.ModelGroup.{model}."+tail
