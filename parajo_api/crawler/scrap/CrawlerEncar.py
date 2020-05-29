@@ -152,9 +152,9 @@ class CrawlerEncar:
         return None 
 
     # 차량가격정보 크롤링
-    def crawlCarPrice(self, company, model, modelDetail, grade):
+    def crawlCarPrice(self, company, model, modelDetail, grade, gradeSubGroup, gradeSub):
         # 셀레니움에 url 요청
-        url = self.makeUrl(company, model, modelDetail, grade, 100)
+        url = self.makeUrlUnderGrade(company, model, modelDetail, grade, gradeSubGroup, gradeSub, 100)
         print('url: '+url)
         driver = self.getPageWithSelenium(url, 'price')
         
@@ -163,7 +163,7 @@ class CrawlerEncar:
             contentList = list() #컨텐트 반환리스트
             selector = '//tbody[@id="sr_normal"]/tr[@data-index]'
             selectedElems = driver.find_elements_by_xpath(selector)
-            print('찾은 리스트 개수: '+str(len(selectedElems)))
+            print('찾은 목록 개수 : '+str(len(selectedElems)))
             if(len(selectedElems) >0):
                 for elem in selectedElems:
                     #차량 고유 id
@@ -176,11 +176,21 @@ class CrawlerEncar:
                     # 차량 정보
                     model_text = elem.find_element_by_css_selector('td.inf a').text
                     detail_text = elem.find_element_by_css_selector('td.inf .detail').text
-                    info = model_text+detail_text
-                    price = elem.find_element_by_css_selector('td.prc_hs').text
+                    #최초등록 년,월 분리
+                    yymm_unform = elem.find_element_by_css_selector('td.inf .detail .yer').text
+                    yymm_arr = yymm_unform.split('/')
+                    init_regdate_year = yymm_arr[0] #년
+                    init_regdate_month = yymm_arr[1][0]+yymm_arr[1][1] #월
+                    # 주행거리
+                    distance_unform = elem.find_element_by_css_selector('td.inf .detail .km').text
+                    distance = distance_unform.replace(',','').replace('km','') 
+
+                    # info = model_text+detail_text
+                    price_unform = elem.find_element_by_css_selector('td.prc_hs').text
+                    price = price_unform.replace(',','') 
                     # accident = self.getCarAccident(carId) #사고이력 조회(새창)
                     # 리스트에 삽입
-                    content = Content(carId, '엔카', info, price, accident=None) 
+                    content = Content(carId, '엔카', init_regdate_year, init_regdate_month, distance, price, accident=None) 
                     contentList.append(content)
                 # pp(contentList)
                 return contentList # 컨텐츠 리스트 반환
@@ -289,14 +299,13 @@ class CrawlerEncar:
             # gradeSubGroup url 코드작성
             gradeSubGroup = self.adjustParam(gradeSubGroup)
             gradeSubGroup = quote(gradeSubGroup)
-            # tail = f"_.(C.Model.{modelDetail}._.BadgeGroup.{grade}.)))))%22{limit}%7D" 
-            tail = f"_.(C.Model.{modelDetail}._.(C.BadgeGroup.{grade}._.Badge.{gradeSubGroup}.))))))%22{limit}%7D" #수정요
+            tail = f"_.(C.Model.{modelDetail}._.(C.BadgeGroup.{grade}._.Badge.{gradeSubGroup}.))))))%22{limit}%7D" 
             
             if gradeSub is not None:
                 # gradeSub url 코드작성
                 gradeSub = self.adjustParam(gradeSub)
                 gradeSub = quote(gradeSub)
-                # tail = f"_.(C.Model.{modelDetail}._.BadgeGroup.{grade}.)))))%22{limit}%7D" #수정요
+                tail = f"_.(C.Model.{modelDetail}._.(C.BadgeGroup.{grade}._.(C.Badge.{gradeSubGroup}._.BadgeDetail.{gradeSub}.)))))))%22{limit}%7D" #수정요
 
     
         url = f"http://www.encar.com/{pre}#!%7B%22action%22%3A%22(And.Hidden.N._.(C.{cartype}._.(C.Manufacturer.{company}._.(C.ModelGroup.{model}."+tail
