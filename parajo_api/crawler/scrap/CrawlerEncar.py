@@ -199,6 +199,8 @@ class CrawlerEncar:
                     price = price_unform.replace(',','') 
                     if not price.isdecimal() :
                         continue
+                    if price == '0':
+                        continue
 
                     # accident = self.getCarAccident(carId) #사고이력 조회(새창)
                     # 리스트에 삽입
