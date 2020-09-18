@@ -5,6 +5,7 @@ class CarBrand(models.Model):
     seq = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50, default=None)
     region = models.CharField(max_length=50, default=None)
+    scrap = models.IntegerField(default=None)#필터용
     class Meta:
         db_table = "car_category_brand" # 실제 테이블명을 직접 입력할 경우 
     
@@ -15,7 +16,7 @@ class CarModel(models.Model):
     seq = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     brand = models.ForeignKey(CarBrand, on_delete=models.PROTECT, db_column='brand')
-
+    scrap = models.IntegerField(default=None) #필터용
     class Meta:
         db_table = "car_category_model" # 실제 테이블명을 직접 입력할 경우 
     
@@ -99,7 +100,7 @@ class CarInfo(models.Model):
     regdate = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = "web_scraped_car_info" # 실제 테이블명을 직접 입력할 경우 
+        db_table = "web_scraped_car_info_beta" # 실제 테이블명을 직접 입력할 경우 
     
     def __str__(self):
         return  self.info

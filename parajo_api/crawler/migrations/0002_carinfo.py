@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 ('site', models.CharField(max_length=20)),
             ],
             options={
-                'db_table': 'web_scraped_car_info',
+                'db_table': 'web_scraped_car_info_beta',
             },
         ),
     ]

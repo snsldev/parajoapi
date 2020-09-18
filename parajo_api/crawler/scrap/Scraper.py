@@ -152,6 +152,11 @@ class Scrapper:
       #   continue
       brand_name = brand.name
       model_name = model.name
+      # if brand.scrap !=1 : 
+      #   continue
+      # if model.scrap !=1 : 
+      #   continue
+
       modeldetail_name = re.sub('\(([^\)])*~(.)*\)', '', modelDetail.name).strip() # (~년식정보) 제거후 앞뒤 공백 제거
       grade_name = grade.name
       modeldetail_seq = modelDetail.seq

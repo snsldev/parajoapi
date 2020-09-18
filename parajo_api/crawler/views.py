@@ -2,7 +2,7 @@ from django.http import HttpResponse, JsonResponse
 from .scrap.ScrapService import ScrapService
 
 def index(request):
-    return HttpResponse("Hello, world. You're at the polls index.")
+    return HttpResponse("Hello, world. You're at index.")
 
 def scrapCarPrice(request):
     scrapService = ScrapService()

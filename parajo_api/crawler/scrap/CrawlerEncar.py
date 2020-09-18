@@ -32,6 +32,7 @@ class CrawlerEncar:
             if mode == 'price':
                 time.sleep(2)
                 element = WebDriverWait(self.driver, 7).until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'tbody#sr_normal > tr')))
+               # time.sleep(1)
             elif mode == 'modeldetail':
                 time.sleep(2)
                 element = WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'div#stepGardeSet')))
@@ -166,27 +167,35 @@ class CrawlerEncar:
             print('찾은 목록 개수 : '+str(len(selectedElems)))
             if(len(selectedElems) >0):
                 for elem in selectedElems:
+                    
+                    # print('getcssvalue: '+str(elem.value_of_css_property("display")))
+                    if elem.value_of_css_property("display") == 'none': 
+                        continue
+
                     #차량 고유 id
                     link = elem.find_element_by_css_selector('a').get_attribute('href')
                     # print('link:'+link)
                     regex = re.compile("(carid=)(([0-9]?)+)")
                     matchobj = regex.search(link)
                     carId = matchobj.group(2) 
-                    # print('carId:'+carId)
+                    print('carId:'+carId)
                     # 차량 정보
                     model_text = elem.find_element_by_css_selector('td.inf a').text
                     detail_text = elem.find_element_by_css_selector('td.inf .detail').text
                     #최초등록 년,월 분리
                     yymm_unform = elem.find_element_by_css_selector('td.inf .detail .yer').text
+                   # print('yymm_unform: '+str(yymm_unform))
                     yymm_arr = yymm_unform.split('/')
+                   # print('yymm_arr: '+str(yymm_arr))
                     init_regdate_year = yymm_arr[0] #년
-                    init_regdate_month = yymm_arr[1][0]+yymm_arr[1][1] #월
+                    # init_regdate_month = yymm_arr[1][0]+yymm_arr[1][1] #월
+                    init_regdate_month = yymm_arr[1].split('식')[0]
                     # 주행거리
                     distance_unform = elem.find_element_by_css_selector('td.inf .detail .km').text
                     distance = distance_unform.replace(',','').replace('km','') 
 
                     # info = model_text+detail_text
-                    price_unform = elem.find_element_by_css_selector('td.prc_hs').text
+                    price_unform = elem.find_element_by_css_selector('td.prc_hs strong').text
                     price = price_unform.replace(',','') 
                     # accident = self.getCarAccident(carId) #사고이력 조회(새창)
                     # 리스트에 삽입
