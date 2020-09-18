@@ -197,6 +197,9 @@ class CrawlerEncar:
                     # info = model_text+detail_text
                     price_unform = elem.find_element_by_css_selector('td.prc_hs strong').text
                     price = price_unform.replace(',','') 
+                    if not price.isdecimal() :
+                        continue
+
                     # accident = self.getCarAccident(carId) #사고이력 조회(새창)
                     # 리스트에 삽입
                     content = Content(carId, '엔카', init_regdate_year, init_regdate_month, distance, price, accident=None) 
