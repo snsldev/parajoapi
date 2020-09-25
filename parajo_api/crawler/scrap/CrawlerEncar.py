@@ -8,6 +8,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import UnexpectedAlertPresentException
 from urllib.parse import quote, urlencode
@@ -17,39 +18,46 @@ class CrawlerEncar:
     # 셀레니움 초기화 
     def __init__(self):
         chrome_options = Options()
-        chrome_options.add_argument("--headless")
+        # chrome_options.add_argument("--headless")
+        # chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--disable-extensions")
         # UserAgent값 변경시
         # chrome_options.add_argument("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36")
         self.driver = webdriver.Chrome(
             executable_path='C:\work\chromedriver\chromedriver',
             options=chrome_options)
 
+
+
     # 실레니움 url요청
     def getPageWithSelenium(self, url, mode):
-        driver = None
+
+        driver = self.driver
         try:
-            self.driver.get(url)
+            driver.get(url)
             if mode == 'price':
-                time.sleep(2)
-                element = WebDriverWait(self.driver, 7).until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'tbody#sr_normal > tr')))
-               # time.sleep(1)
+                # time.sleep(5)
+                WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'tbody#sr_normal > tr')))
             elif mode == 'modeldetail':
                 time.sleep(2)
-                element = WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'div#stepGardeSet')))
+                element = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'div#stepGardeSet')))
             elif mode == 'grade':
                 time.sleep(2)
-                element = WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'dl#stepGared_0')))
+                element = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'dl#stepGared_0')))
             elif mode == 'gradeSubGroup':
                 print('==driver url mode is gradeSubGroup')
                 time.sleep(2)
-                element = WebDriverWait(self.driver, 3).until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'dl#stepDeGared'))) #수정됨
-            driver = self.driver
+                element = WebDriverWait(driver, 3).until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'dl#stepDeGared'))) #수정됨
+            
         except UnexpectedAlertPresentException as e:
             print('[!] Error: ' + str(e))
+            return None
         except TimeoutException as e:
             print ("Timed out waiting for page to load")
+            return None
         except Exception as e:
             print("알수업는 예외 발생"+e)
+            return None
         finally:
             return driver
          
@@ -155,7 +163,7 @@ class CrawlerEncar:
     # 차량가격정보 크롤링
     def crawlCarPrice(self, company, model, modelDetail, grade, gradeSubGroup, gradeSub):
         # 셀레니움에 url 요청
-        url = self.makeUrlUnderGrade(company, model, modelDetail, grade, gradeSubGroup, gradeSub, 100)
+        url = self.makeUrlUnderGrade(company, model, modelDetail, grade, gradeSubGroup, gradeSub, 50)
         print('url: '+url)
         driver = self.getPageWithSelenium(url, 'price')
         
@@ -195,20 +203,42 @@ class CrawlerEncar:
                     distance = distance_unform.replace(',','').replace('km','') 
 
                     # info = model_text+detail_text
-                    price_unform = elem.find_element_by_css_selector('td.prc_hs strong').text
-                    price = price_unform.replace(',','') 
+                    # 비정상 가격 데이터는 수집안함
+                    try:
+                        if elem.find_element_by_css_selector('td.prc_hs .type_leaserent'): 
+                            print('리스승계 엘리먼트 건너뜀: '+elem.find_element_by_css_selector('td.prc_hs .type_leaserent').text)
+                            continue
+                    except :
+                        pass            
+
+                    price = elem.find_element_by_css_selector('td.prc_hs strong').text.replace(',','') 
+                    
+                    # 숫자인지 검사(음의정수도 걸러짐)
                     if not price.isdecimal() :
                         continue
+                    
+                    # 0인가격 제외
                     if price == '0':
+                        continue
+
+                    # 9999인 가격 제외
+                    if price == '9999':
                         continue
 
                     # accident = self.getCarAccident(carId) #사고이력 조회(새창)
                     # 리스트에 삽입
                     content = Content(carId, '엔카', init_regdate_year, init_regdate_month, distance, price, accident=None) 
                     contentList.append(content)
+                ##새탭열기
+                driver.execute_script("window.open();")
+                windows_after = driver.window_handles[1]
+                driver.close()
+                driver.switch_to.window(windows_after)
+                
+
                 # pp(contentList)
                 return contentList # 컨텐츠 리스트 반환
-
+            
         #url 요청후 컨텐츠가없으면 none
         return None 
 

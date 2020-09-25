@@ -25,6 +25,7 @@ class Scrapper:
       grade_name = grade.name 
       modelDetail = grade.modelDetail # 세부모델
       modelDetail_name = re.sub('\(([^\)])*~(.)*\)', '', modelDetail.name).strip() # (~년식정보) 제거후 앞뒤 공백 제거
+      #modelDetail_name = modelDetail.name.strip()
       model = modelDetail.model
       brand = model.brand
       grade_subgroup_name = gradeSubGroup.name
@@ -141,6 +142,11 @@ class Scrapper:
     # print(results)
     crawler = self.crawler
     # cnt=0
+    # 이전 모델명을 저장하기위한 변수
+    #prev_modelDetail_name = None;
+    prev_modelDetail_seq = None;
+    prev_grade_seq = None;
+
     for gradeSubGroup in carDBList:
       gradeSubList = gradeSubGroup.cargradesubs.all()
       grade_sub_group_name = gradeSubGroup.name
@@ -152,16 +158,27 @@ class Scrapper:
       #   continue
       brand_name = brand.name
       model_name = model.name
-      # if brand.scrap !=1 : 
-      #   continue
-      # if model.scrap !=1 : 
-      #   continue
+      if brand.checked ==1 : 
+        continue
+      if model.checked ==1 : 
+        continue
+      if modelDetail.checked ==1 : 
+        continue
+      if grade.checked ==1 : 
+        continue
 
       modeldetail_name = re.sub('\(([^\)])*~(.)*\)', '', modelDetail.name).strip() # (~년식정보) 제거후 앞뒤 공백 제거
       grade_name = grade.name
       modeldetail_seq = modelDetail.seq
       grade_seq = grade.seq
       grade_subgroup_seq = gradeSubGroup.seq
+
+       # modelDetail 한단위를 다 저장하면 체크됨으로 업데이트
+      if (prev_modelDetail_seq is not None) and (prev_modelDetail_seq != modeldetail_seq): 
+         CarModelDetail.objects.filter(seq=prev_modelDetail_seq).update(checked=1)
+       # grade 한단위를 다 저장하면 체크됨으로 업데이트
+      if (prev_grade_seq is not None) and (prev_grade_seq != grade_seq): 
+         CarModelDetail.objects.filter(seq=grade_seq).update(checked=1)
     
       if gradeSubList.count() == 0:
         # 카테고리에 세부등급2가 없을때
@@ -181,6 +198,13 @@ class Scrapper:
           scrapedResult = crawler.crawlCarPrice(brand_name, model_name, modeldetail_name, grade_name, grade_sub_group_name, grade_sub_name)
           if scrapedResult is not None:
              self.storeCarPrice(modeldetail_seq, grade_seq, grade_subgroup_seq, grade_sub_seq, brand_name, model_name, modeldetail_name, grade_name, grade_sub_group_name, grade_sub_name, scrapedResult)
+     
+      # 저장완료하면 이름과 시퀀스를 임시로 갖고있는다
+      # prev_modelDetail_name = modeldetail_name
+      prev_modelDetail_seq = modeldetail_seq
+      prev_modelDetail_seq = grade_seq
+
+
     # print('all count is :'+str(cnt))
     print('END-SCRAPING-CAR-PROCESS =================')
     crawler.getDriver().quit() #끝났으면 셀레니움 브라우져 정상종료
@@ -204,6 +228,13 @@ class Scrapper:
         init_regdate_month=item.init_regdate_month, 
         distance=item.distance, 
         price=item.price, accident=item.accident, site=item.site )
+
+      #같은 상품아이디 존재하면 하지 않음
+      exist_carid_cnt = CarInfo.objects.filter(carId=carinfo.carId).count() 
+      if exist_carid_cnt > 0:
+        print("중복데이터 입니다 record insert pass!, carId is: "+carinfo.carId)
+        continue
+
       carinfo.save()
 
 
