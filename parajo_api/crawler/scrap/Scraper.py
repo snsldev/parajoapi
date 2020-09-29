@@ -178,7 +178,7 @@ class Scrapper:
          CarModelDetail.objects.filter(seq=prev_modelDetail_seq).update(checked=1)
        # grade 한단위를 다 저장하면 체크됨으로 업데이트
       if (prev_grade_seq is not None) and (prev_grade_seq != grade_seq): 
-         CarModelDetail.objects.filter(seq=grade_seq).update(checked=1)
+         CarGrade.objects.filter(seq=grade_seq).update(checked=1)
     
       if gradeSubList.count() == 0:
         # 카테고리에 세부등급2가 없을때
@@ -202,7 +202,7 @@ class Scrapper:
       # 저장완료하면 이름과 시퀀스를 임시로 갖고있는다
       # prev_modelDetail_name = modeldetail_name
       prev_modelDetail_seq = modeldetail_seq
-      prev_modelDetail_seq = grade_seq
+      prev_grade_seq = grade_seq
 
 
     # print('all count is :'+str(cnt))

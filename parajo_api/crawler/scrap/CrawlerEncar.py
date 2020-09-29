@@ -217,12 +217,12 @@ class CrawlerEncar:
                     if not price.isdecimal() :
                         continue
                     
-                    # 0인가격 제외
-                    if price == '0':
+                    # 0인가격 또는 9999인 가격 제외제외
+                    if price == '0' or price == '9999':
                         continue
 
-                    # 9999인 가격 제외
-                    if price == '9999':
+                    # 150이하 가격 제외
+                    if int(price) <= 150:
                         continue
 
                     # accident = self.getCarAccident(carId) #사고이력 조회(새창)
