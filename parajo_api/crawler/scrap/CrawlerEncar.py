@@ -18,7 +18,7 @@ class CrawlerEncar:
     # 셀레니움 초기화 
     def __init__(self):
         chrome_options = Options()
-        # chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--headless")
         # chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--disable-extensions")
         # UserAgent값 변경시
