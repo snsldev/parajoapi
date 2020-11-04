@@ -1,5 +1,6 @@
 from django.db import models
-
+from django.utils import timezone
+from datetime import datetime
 # 차량 카테고리-브랜드
 class CarBrand(models.Model):
     seq = models.AutoField(primary_key=True)
@@ -72,7 +73,7 @@ class CarGradeSub(models.Model):
     def __str__(self):
         return  self.name
 
-# 자동차 정보
+# 스크랩 자동차 정보
 class CarInfo(models.Model):
     seq = models.AutoField(primary_key=True)
     
@@ -88,7 +89,6 @@ class CarInfo(models.Model):
     catg_grade_sub_name = models.CharField(max_length=50, default=None)
     catg_grade_subgroup_name = models.CharField(max_length=50, default=None)
     distance = models.CharField(max_length=50, default=None)
-    model_year = models.CharField(max_length=50, default=None)
     init_regdate_year = models.CharField(max_length=50, default=None)
     init_regdate_month = models.CharField(max_length=50, default=None)
     
@@ -97,7 +97,7 @@ class CarInfo(models.Model):
     price = models.CharField(max_length=50, default=None)
     accident = models.CharField(max_length=50, default=None)
     site = models.CharField(max_length=20, default=None)
-    regdate = models.DateTimeField(auto_now=True)
+    regdate = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "web_scraped_car_info" # 실제 테이블명을 직접 입력할 경우 
