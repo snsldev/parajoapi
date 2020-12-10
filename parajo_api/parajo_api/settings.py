@@ -51,6 +51,8 @@ ALLOWED_HOSTS = ['*']
 
 # Application definition
 
+ADMIN_ENABLED = False
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -102,7 +104,8 @@ WSGI_APPLICATION = 'parajo_api.wsgi.application'
 #     }
 # }
 LOCAL_DB_HOST = 'localhost'
-DB_HOST = 'parajocom.cnr07eramdtv.ap-northeast-2.rds.amazonaws.com'
+DEV_DB_HOST = 'parajo-dev.cnr07eramdtv.ap-northeast-2.rds.amazonaws.com'
+# PROD_DB_HOST = 'parajocom.cnr07eramdtv.ap-northeast-2.rds.amazonaws.com'
 
 if 'RDS_HOSTNAME' in os.environ:
     DATABASES = {
@@ -111,7 +114,7 @@ if 'RDS_HOSTNAME' in os.environ:
             'NAME': 'parajo',
             'USER': 'parajodev', # 데이터베이스 계정
             'PASSWORD': 'parajodev', # 계정 비밀번호
-            'HOST': LOCAL_DB_HOST, # 데이테베이스 주소(IP)
+            'HOST': DEV_DB_HOST, # 데이테베이스 주소(IP)
             'PORT': '3306', # 데이터베이스 포트(보통은 3306)
             'OPTIONS': {
                 'init_command': 'SET sql_mode="STRICT_TRANS_TABLES"'
@@ -125,7 +128,7 @@ else:
             'NAME': 'parajo',
             'USER': 'parajodev', # 데이터베이스 계정
             'PASSWORD': 'parajodev', # 계정 비밀번호
-            'HOST': LOCAL_DB_HOST, # 데이테베이스 주소(IP)
+            'HOST': DEV_DB_HOST, # 데이테베이스 주소(IP)
             'PORT': '3306', # 데이터베이스 포트(보통은 3306)
             'OPTIONS': {
                 'init_command': 'SET sql_mode="STRICT_TRANS_TABLES"'
