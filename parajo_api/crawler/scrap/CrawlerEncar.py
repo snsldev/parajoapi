@@ -12,6 +12,9 @@ from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import UnexpectedAlertPresentException
 from urllib.parse import quote, urlencode
+import os
+
+PROJECT_PATH = os.path.abspath(os.path.dirname(__name__))
 
 class CrawlerEncar:
  
@@ -21,10 +24,14 @@ class CrawlerEncar:
         chrome_options.add_argument("--headless")
         # chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--disable-extensions")
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--disable-dev-shm-usage')
         # UserAgent값 변경시
         # chrome_options.add_argument("user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36")
+        chromedriver_path=os.path.join(PROJECT_PATH, 'chromedriver/chromedriver')
+
         self.driver = webdriver.Chrome(
-            executable_path='C:\work\chromedriver\chromedriver',
+            executable_path=chromedriver_path,
             options=chrome_options)
 
 

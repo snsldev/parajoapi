@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 from datetime import timedelta
+from celery.schedules import crontab
 
 # Celery settings
 
@@ -25,9 +26,9 @@ CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_BEAT_SCHEDULE = {
-    'run-every-seconds': {
-        'task': 'crawler.tasks.sayHello',
-        'schedule': timedelta(seconds=1),
+    'run-every-sunday': {
+        'task': 'crawler.tasks.scrapCarPrice',
+        'schedule': crontab(minute=0, hour=0, day_of_week='sunday'),
         #'schedule': crontab(minute=0, hour=0, day_of_month='2-30/2'), #짝수일 
         'args': ()
     },
